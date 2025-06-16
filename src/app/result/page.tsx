@@ -15,9 +15,9 @@ function getBossImage(bossname?: string): string {
   
   switch (bossname?.toLowerCase()) {
     case 'lady delayna':
-      return 'https://pub-7816c9687d9b47a894436af0a6cc0309.r2.dev/background.png'
+      return process.env.NEXT_PUBLIC_LADY_DELAYNA_OG_IMAGE || 'https://pub-7816c9687d9b47a894436af0a6cc0309.r2.dev/background.png'
     case 'phantom tax':
-      return 'https://pub-7816c9687d9b47a894436af0a6cc0309.r2.dev/Card.png'
+      return process.env.NEXT_PUBLIC_PHANTOM_TAX_OG_IMAGE || 'https://pub-7816c9687d9b47a894436af0a6cc0309.r2.dev/Card.png'
     case 'dragon':
       return `${baseUrl}/images/dragon-boss.jpg`
     case 'wizard':
@@ -116,10 +116,10 @@ async function ResultContent({ searchParams }: ResultPageProps) {
       {/* Main content */}
       <div className="relative z-10 w-full max-w-4xl mx-auto px-4">
         {/* Battle display */}
-        <div className="flex items-center justify-between max-w-5xl mx-auto mb-12">
+        <div className="flex items-center justify-between max-w-5xl mx-auto mb-8 sm:mb-12 px-2 sm:px-4">
           {/* Player side */}
-          <div className="flex flex-col items-center w-48">
-            <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 relative mb-4">
+          <div className="flex flex-col items-center flex-1 max-w-[120px] sm:max-w-[150px] md:max-w-none md:w-48">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 relative mb-2 sm:mb-4">
               <Image
                 src="/player.png"
                 alt="Player"
@@ -128,20 +128,20 @@ async function ResultContent({ searchParams }: ResultPageProps) {
                 className="object-contain"
               />
             </div>
-            <h3 className="text-white text-lg md:text-xl font-bold mb-4">Player</h3>
-            <div className="bg-blue-600 px-6 py-3 rounded-xl min-w-[80px] flex justify-center">
-              <span className="text-white text-2xl sm:text-3xl font-bold">{playerScore}</span>
+            <h3 className="text-white text-sm sm:text-base md:text-xl font-bold mb-2 sm:mb-4">Player</h3>
+            <div className="bg-blue-600 px-3 sm:px-4 md:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl min-w-[60px] sm:min-w-[80px] flex justify-center">
+              <span className="text-white text-lg sm:text-xl md:text-2xl font-bold">{playerScore}</span>
             </div>
           </div>
 
           {/* VS */}
-          <div className="flex items-center justify-center">
-            <h2 className="text-4xl md:text-6xl font-bold text-white transform -skew-x-12">VS</h2>
+          <div className="flex items-center justify-center mx-2 sm:mx-4">
+            <h2 className="text-2xl sm:text-3xl md:text-6xl font-bold text-white transform -skew-x-12">VS</h2>
           </div>
 
           {/* Boss side */}
-          <div className="flex flex-col items-center w-48">
-            <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 relative mb-4">
+          <div className="flex flex-col items-center flex-1 max-w-[120px] sm:max-w-[150px] md:max-w-none md:w-48">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 relative mb-2 sm:mb-4">
               {bossCharacterImage ? (
                 <Image
                   src={bossCharacterImage}
@@ -156,9 +156,9 @@ async function ResultContent({ searchParams }: ResultPageProps) {
                 </div>
               )}
             </div>
-            <h3 className="text-white text-lg md:text-xl font-bold mb-4 uppercase text-center">{bossname || 'Boss'}</h3>
-            <div className={`${isPhantomTax ? 'bg-red-600' : 'bg-purple-600'} px-6 py-3 rounded-xl min-w-[80px] flex justify-center`}>
-              <span className="text-white text-2xl sm:text-3xl font-bold">{bossScore}</span>
+            <h3 className="text-white text-xs sm:text-base md:text-xl font-bold mb-2 sm:mb-4 uppercase text-center break-words">{bossname || 'Boss'}</h3>
+            <div className={`${isPhantomTax ? 'bg-red-600' : 'bg-purple-600'} px-3 sm:px-4 md:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl min-w-[60px] sm:min-w-[80px] flex justify-center`}>
+              <span className="text-white text-lg sm:text-xl md:text-2xl font-bold">{bossScore}</span>
             </div>
           </div>
         </div>
@@ -166,9 +166,9 @@ async function ResultContent({ searchParams }: ResultPageProps) {
         {/* Result section */}
         <div className="text-center">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-white">คุณได้รับชัยชนะ</h1>
-          <p className="text-base sm:text-lg md:text-xl text-gray-200 mb-8 px-4">
-            ชัยชนะที่ได้รับสามารถต่อยอดไปในธุรกิจจริง<br />
-            ปรึกษาเรา DEVSMITH ช่วยได้
+          <p className="text-sm sm:text-base md:text-xl text-gray-200 mb-6 sm:mb-8 px-4">
+            ชัยชนะที่ได้รับสามารถต่อยอดไปในธุรกิจจริง<br className="hidden sm:block" />
+            <span className="block sm:inline">ปรึกษาเรา DEVSMITH ช่วยได้</span>
           </p>
           
           {/* Result badge */}

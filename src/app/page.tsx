@@ -1,4 +1,30 @@
 import Link from 'next/link'
+import { Metadata } from 'next'
+import { QUERY_PARAMS } from '@/lib/constants'
+
+export const metadata: Metadata = {
+  title: 'Battle Arena - Test Your Skills',
+  description: 'Challenge powerful bosses and test your battle skills in this epic arena',
+  openGraph: {
+    title: 'Battle Arena - Test Your Skills',
+    description: 'Challenge powerful bosses and test your battle skills in this epic arena',
+    images: [
+      {
+        url: 'https://pub-7816c9687d9b47a894436af0a6cc0309.r2.dev/background.png',
+        width: 1200,
+        height: 630,
+        alt: 'Battle Arena Game',
+      },
+    ],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Battle Arena - Test Your Skills',
+    description: 'Challenge powerful bosses and test your battle skills in this epic arena',
+    images: ['https://pub-7816c9687d9b47a894436af0a6cc0309.r2.dev/background.png'],
+  },
+}
 
 export default function Home() {
   const exampleBattles = [
@@ -29,7 +55,7 @@ export default function Home() {
           {exampleBattles.map((battle, index) => (
             <Link
               key={index}
-              href={`/result?bossname=${encodeURIComponent(battle.boss)}&scoreplayer=${battle.playerScore}&scoreboss=${battle.bossScore}`}
+              href={`/result?${QUERY_PARAMS.BOSS_NAME}=${encodeURIComponent(battle.boss)}&${QUERY_PARAMS.PLAYER_SCORE}=${battle.playerScore}&${QUERY_PARAMS.BOSS_SCORE}=${battle.bossScore}`}
               className="block bg-gray-800 hover:bg-gray-700 transition-colors rounded-lg p-4 sm:p-6 text-left mx-2 sm:mx-0"
             >
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">

@@ -1,39 +1,34 @@
 import { Suspense } from 'react'
 import { Metadata } from 'next'
 import Image from 'next/image'
+import { notFound } from 'next/navigation'
+import { QUERY_PARAMS, BOSS_CONFIG, isValidScore, sanitizeBossName, type BossKey } from '@/lib/constants'
 
 interface ResultPageProps {
   searchParams: Promise<{
-    bossname?: string
-    scoreplayer?: string
-    scoreboss?: string
+    [QUERY_PARAMS.BOSS_NAME]?: string
+    [QUERY_PARAMS.PLAYER_SCORE]?: string
+    [QUERY_PARAMS.BOSS_SCORE]?: string
   }>
 }
 
 function getBossImage(bossname?: string): string {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+  const bossKey = bossname?.toLowerCase() as BossKey
   
-  switch (bossname?.toLowerCase()) {
-    case 'lady delayna':
-      return process.env.NEXT_PUBLIC_LADY_DELAYNA_OG_IMAGE || 'https://pub-7816c9687d9b47a894436af0a6cc0309.r2.dev/background.png'
-    case 'phantom tax':
-      return process.env.NEXT_PUBLIC_PHANTOM_TAX_OG_IMAGE || 'https://pub-7816c9687d9b47a894436af0a6cc0309.r2.dev/Card.png'
-    case 'dragon':
-      return `${baseUrl}/images/dragon-boss.jpg`
-    case 'wizard':
-      return `${baseUrl}/images/wizard-boss.jpg`
-    case 'knight':
-      return `${baseUrl}/images/knight-boss.jpg`
-    case 'demon':
-      return `${baseUrl}/images/demon-boss.jpg`
-    default:
-      return `${baseUrl}/images/default-boss.jpg`
+  if (bossKey && BOSS_CONFIG[bossKey]) {
+    return BOSS_CONFIG[bossKey].ogImage
   }
+  
+  return `${baseUrl}/images/default-boss.svg`
 }
 
 export async function generateMetadata({ searchParams }: ResultPageProps): Promise<Metadata> {
   const params = await searchParams
-  const { bossname, scoreplayer, scoreboss } = params
+  const bossname = sanitizeBossName(params[QUERY_PARAMS.BOSS_NAME])
+  const scoreplayer = params[QUERY_PARAMS.PLAYER_SCORE]
+  const scoreboss = params[QUERY_PARAMS.BOSS_SCORE]
+  
   const playerScore = parseInt(scoreplayer || '0')
   const bossScore = parseInt(scoreboss || '0')
   const result = playerScore > bossScore ? 'Victory!' : playerScore < bossScore ? 'Defeat!' : 'Draw!'
@@ -69,39 +64,27 @@ export async function generateMetadata({ searchParams }: ResultPageProps): Promi
 
 async function ResultContent({ searchParams }: ResultPageProps) {
   const params = await searchParams
-  const { bossname, scoreplayer, scoreboss } = params
-
-  const playerScore = parseInt(scoreplayer || '0')
-  const bossScore = parseInt(scoreboss || '0')
-  const result = playerScore > bossScore ? 'Victory!' : playerScore < bossScore ? 'Defeat!' : 'Draw!'
-
-  // Determine background gradient based on boss
-  const getGradientClass = () => {
-    switch (bossname?.toLowerCase()) {
-      case 'phantom tax':
-        return 'bg-gradient-to-r from-blue-900 via-purple-900 to-red-900'
-      case 'lady delayna':
-      default:
-        return 'bg-gradient-to-r from-blue-900 via-purple-900 to-purple-900'
-    }
+  const rawBossName = params[QUERY_PARAMS.BOSS_NAME]
+  const rawPlayerScore = params[QUERY_PARAMS.PLAYER_SCORE]
+  const rawBossScore = params[QUERY_PARAMS.BOSS_SCORE]
+  
+  // Validate inputs
+  if (!isValidScore(rawPlayerScore) || !isValidScore(rawBossScore)) {
+    notFound()
   }
   
-  const gradientClass = getGradientClass()
-  const isPhantomTax = bossname?.toLowerCase() === 'phantom tax'
-
-  // Determine boss image
-  const getBossCharacterImage = () => {
-    switch (bossname?.toLowerCase()) {
-      case 'lady delayna':
-        return '/ladydelayna.png'
-      case 'phantom tax':
-        return '/phantomtax.png'
-      default:
-        return null
-    }
-  }
-
-  const bossCharacterImage = getBossCharacterImage()
+  const bossname = sanitizeBossName(rawBossName)
+  const playerScore = parseInt(rawPlayerScore || '0')
+  const bossScore = parseInt(rawBossScore || '0')
+  const result = playerScore > bossScore ? 'Victory!' : playerScore < bossScore ? 'Defeat!' : 'Draw!'
+  
+  // Get boss configuration
+  const bossKey = bossname?.toLowerCase() as BossKey
+  const bossConfig = bossKey && BOSS_CONFIG[bossKey] ? BOSS_CONFIG[bossKey] : null
+  
+  const gradientClass = bossConfig?.gradient || 'bg-gradient-to-r from-blue-900 via-purple-900 to-purple-900'
+  const bossCharacterImage = bossConfig?.characterImage || null
+  const bossScoreColor = bossConfig?.scoreColor || 'bg-purple-600'
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
@@ -122,14 +105,14 @@ async function ResultContent({ searchParams }: ResultPageProps) {
             <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 relative mb-2 sm:mb-4">
               <Image
                 src="/player.png"
-                alt="Player"
+                alt="Player character avatar ready for battle"
                 width={128}
                 height={128}
                 className="object-contain"
               />
             </div>
             <h3 className="text-white text-sm sm:text-base md:text-xl font-bold mb-2 sm:mb-4">Player</h3>
-            <div className="bg-blue-600 px-3 sm:px-4 md:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl min-w-[60px] sm:min-w-[80px] flex justify-center">
+            <div className="bg-blue-600 px-3 sm:px-4 md:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl min-w-[60px] sm:min-w-[80px] flex justify-center" aria-label={`Player score: ${playerScore}`}>
               <span className="text-white text-lg sm:text-xl md:text-2xl font-bold">{playerScore}</span>
             </div>
           </div>
@@ -145,7 +128,7 @@ async function ResultContent({ searchParams }: ResultPageProps) {
               {bossCharacterImage ? (
                 <Image
                   src={bossCharacterImage}
-                  alt={bossname || 'Boss'}
+                  alt={`${bossConfig?.name || bossname || 'Boss'} character avatar ready for battle`}
                   width={128}
                   height={128}
                   className="object-contain"
@@ -156,8 +139,8 @@ async function ResultContent({ searchParams }: ResultPageProps) {
                 </div>
               )}
             </div>
-            <h3 className="text-white text-xs sm:text-base md:text-xl font-bold mb-2 sm:mb-4 uppercase text-center break-words">{bossname || 'Boss'}</h3>
-            <div className={`${isPhantomTax ? 'bg-red-600' : 'bg-purple-600'} px-3 sm:px-4 md:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl min-w-[60px] sm:min-w-[80px] flex justify-center`}>
+            <h3 className="text-white text-xs sm:text-base md:text-xl font-bold mb-2 sm:mb-4 uppercase text-center break-words">{bossConfig?.name || bossname || 'Boss'}</h3>
+            <div className={`${bossScoreColor} px-3 sm:px-4 md:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl min-w-[60px] sm:min-w-[80px] flex justify-center`} aria-label={`Boss score: ${bossScore}`}>
               <span className="text-white text-lg sm:text-xl md:text-2xl font-bold">{bossScore}</span>
             </div>
           </div>
@@ -165,10 +148,20 @@ async function ResultContent({ searchParams }: ResultPageProps) {
 
         {/* Result section */}
         <div className="text-center">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-white">คุณได้รับชัยชนะ</h1>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-white">
+            {result === 'Victory!' ? 'คุณได้รับชัยชนะ' : result === 'Defeat!' ? 'คุณพ่ายแพ้' : 'เสมอกัน'}
+          </h1>
           <p className="text-sm sm:text-base md:text-xl text-gray-200 mb-6 sm:mb-8 px-4">
-            ชัยชนะที่ได้รับสามารถต่อยอดไปในธุรกิจจริง<br className="hidden sm:block" />
-            <span className="block sm:inline">ปรึกษาเรา DEVSMITH ช่วยได้</span>
+            {result === 'Victory!' ? (
+              <>
+                ชัยชนะที่ได้รับสามารถต่อยอดไปในธุรกิจจริง<br className="hidden sm:block" />
+                <span className="block sm:inline">ปรึกษาเรา DEVSMITH ช่วยได้</span>
+              </>
+            ) : result === 'Defeat!' ? (
+              <>ความพ่ายแพ้คือบทเรียน ลองใหม่อีกครั้ง!</>
+            ) : (
+              <>การเสมอกันแสดงถึงความสามารถที่ใกล้เคียงกัน</>
+            )}
           </p>
           
           {/* Result badge */}

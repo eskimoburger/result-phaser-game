@@ -44,8 +44,8 @@ export default function ResultDisplay({ bossname, playerScore, bossScore, result
       // Get URL parameters for sharing
       const urlParams = new URLSearchParams(window.location.search)
       const bossname = urlParams.get('bossname') || ''
-      const playerScore = urlParams.get('playerScore') || ''
-      const bossScore = urlParams.get('bossScore') || ''
+      const playerScore = urlParams.get('scoreplayer') || ''
+      const bossScore = urlParams.get('scoreboss') || ''
       const result = urlParams.get('result') || ''
   
       

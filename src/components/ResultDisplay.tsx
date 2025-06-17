@@ -43,14 +43,18 @@ export default function ResultDisplay({ bossname, playerScore, bossScore, result
       
       // Get URL parameters for sharing
       const urlParams = new URLSearchParams(window.location.search)
-      const eventId = urlParams.get('event_id') || ''
-      const sessionId = urlParams.get('session_id') || ''
-      const participantId = urlParams.get('participant_id') || ''
+      const bossname = urlParams.get('bossname') || ''
+      const playerScore = urlParams.get('playerScore') || ''
+      const bossScore = urlParams.get('bossScore') || ''
+      const result = urlParams.get('result') || ''
+  
       
-      console.log('URL Parameters:', { eventId, sessionId, participantId })
+      console.log('URL Parameters:', { bossname, playerScore, bossScore, result })
       
       const shareTitle = `Battle Result: ${result} vs ${bossname || 'Boss'} - Player: ${playerScore} | ${bossname || 'Boss'}: ${bossScore}`
-      const shareUrl = `https://result-marketing.devsmithdev.xyz/minigame-codeclean/result?event_id=${eventId}&session_id=${sessionId}&participant_id=${participantId}&hashtag=#devsmith`
+      // const shareUrl = `https://result-marketing.devsmithdev.xyz/minigame-codeclean/result?bossname=${bossname}&playerScore=${playerScore}&bossScore=${bossScore}&result=${result}&hashtag=#devsmith`
+
+      const shareUrl = `https://result-phaser-game.vercel.app/result?bossname=${bossname}&scoreplayer=${playerScore}&scoreboss=${bossScore}&share=false`
       
       console.log('Share data:', { shareTitle, shareUrl })
 
